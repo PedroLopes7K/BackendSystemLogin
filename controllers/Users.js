@@ -13,6 +13,29 @@ export const getUsers = async (req, res) => {
   }
 }
 
+export const getInfo = async (req, res) => {
+  console.log(req.body.email)
+  // try {
+  //   email = req.body.email
+  if (req.body.email == null) {
+    return res.status(400).json({ msg: ' Erro ao encontrar usuario' })
+  }
+  const user = await Users.findAll({
+    where: {
+      email: req.body.email
+    }
+  })
+  let infoUser = {
+    name: user[0].name,
+    email: user[0].email
+  }
+
+  res.json(infoUser)
+  // } catch (error) {
+  //   console.log(error)
+  // }
+}
+
 export const Register = async (req, res) => {
   const { name, email, password, confPassword } = req.body
   if (password !== confPassword)
@@ -49,7 +72,7 @@ export const Login = async (req, res) => {
       { userId, name, email },
       process.env.ACCESS_TOKEN_SECRET,
       {
-        expiresIn: '15s'
+        expiresIn: '10m'
       }
     )
     const refreshToken = jwt.sign(
@@ -71,7 +94,7 @@ export const Login = async (req, res) => {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000
     })
-    res.json({ accessToken })
+    res.json({ accessToken, email })
   } catch (error) {
     res.status(404).json({ msg: 'Email not found' })
   }
